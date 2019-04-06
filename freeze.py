@@ -68,7 +68,6 @@ if __name__ == "__main__":
     parser.add_argument("--height", required=True, type=int)
     parser.add_argument("--channels", required=True, type=int)
 
-    # FIXME(@ben) refactor with other parts
     parser.add_argument("--sample_rate", type=int, default=16000, help="Expected sample rate of the wavs",)
     parser.add_argument("--clip_duration_ms", type=int)
     parser.add_argument("--window_size_ms", type=float, default=30.0, help="How long each spectrogram timeslice is.",)

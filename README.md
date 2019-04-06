@@ -31,11 +31,17 @@ For evaluating the proposed and the baseline models we use [Google Speech Comman
 
 ### Google Speech Commands Dataset
 
-Follow instructions in https://github.com/hyperconnect/TC-ResNet/speech_commands_dataset.
+Follow instructions in [speech_commands_dataset/](https://github.com/hyperconnect/TC-ResNet/tree/master/speech_commands_dataset)
 
 ## How to run
 
-Scripts to reproduce the training and evaluation procedures discussed in the paper are located on scripts/commands. After training a model, you can  generate .tflite file by following the instruction below.
+Scripts to reproduce the training and evaluation procedures discussed in the paper are located on scripts/commands. After training a model, you can generate .tflite file by following the instruction below.
+
+To train TCResNet8Model-1.0 model, run:
+
+```
+./scripts/commands/TCResNet8Model-1.0_mfcc_40_3010_0.001_mom_l1.sh
+```
 
 To freeze the trained model checkpoint into `.pb` file, run:
 

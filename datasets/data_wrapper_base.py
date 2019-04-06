@@ -137,7 +137,6 @@ class DataWrapperBase(ABC):
                     dataset_label_names.append(name)
             tmp_label_names.append(dataset_label_names)
 
-        # FIXME check even names, not just number of labels
         assert len(set(map(tuple, tmp_label_names))) == 1, "Different labels for each sub-dataset directory"
 
         name_labels = tmp_label_names[0]

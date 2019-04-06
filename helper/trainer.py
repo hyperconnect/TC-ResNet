@@ -400,7 +400,7 @@ class TrainerBase(ABC):
                 # Session.Run!
                 fetch_vals, global_step, step_from_restore, epoch_from_restore = self.run_with_logging(
                     summary_op, metric_op_dict, feed_dict)
-                self.log_summaries(fetch_vals)  # FIXME: What is this for?
+                self.log_summaries(fetch_vals)
 
                 # Save
                 if step_from_restore % self.args.step_save_checkpoint == 0:
