@@ -1,0 +1,3 @@
+# Deep learning
+tensorflow==1.13.1
+-r py36-common.txt

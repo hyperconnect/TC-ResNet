@@ -1,0 +1,15 @@
+# ML
+numpy>=1.16.0
+pandas
+tqdm
+scikit-learn==0.19.1
+scipy
+
+# data
+termcolor
+click
+dask[dataframe]
+
+# misc
+humanfriendly
+overload
