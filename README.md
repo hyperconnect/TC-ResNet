@@ -1,5 +1,7 @@
 # Temporal Convolution for Real-time Keyword Spotting on Mobile Devices
 
+![Main Figure](figure/main_figure.png)
+
 ## Abstract
 Keyword spotting (KWS) plays a critical role in enabling speech-based user interactions on smart devices.
 Recent developments in the field of deep learning have led to wide adoption of convolutional neural networks (CNNs) in KWS systems due to their exceptional accuracy and robustness.
