@@ -1,6 +1,8 @@
 # Temporal Convolution for Real-time Keyword Spotting on Mobile Devices
 
-![Main Figure](figure/main_figure.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/hyperconnect/TC-ResNet/master/figure/main_figure.png", width="500", alt="tc-resnet-temporal-convolution">
+</p>
 
 ## Abstract
 Keyword spotting (KWS) plays a critical role in enabling speech-based user interactions on smart devices.
