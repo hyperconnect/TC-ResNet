@@ -1,4 +1,3 @@
-import random
 from tensorflow.contrib.framework.python.ops import audio_ops as contrib_audio
 import tensorflow as tf
 
@@ -20,8 +19,8 @@ def no_augmentation(x):
     return x
 
 
-def _gen_random_from_zero(maxval):
-    return tf.random.uniform([], maxval=maxval)
+def _gen_random_from_zero(maxval, dtype=tf.float32):
+    return tf.random.uniform([], maxval=maxval, dtype=dtype)
 
 
 def _gen_empty_audio(desired_samples):
@@ -56,7 +55,15 @@ def _mix_background(
     )
 
     # sampling background
-    background_wav = random.choice(background_data)
+    random_background_data_idx = _gen_random_from_zero(
+        len(background_data),
+        dtype=tf.int32
+    )
+    background_wav = tf.case({
+        tf.equal(background_data_idx, random_background_data_idx): 
+            lambda tensor=wav: tensor
+        for background_data_idx, wav in enumerate(background_data)
+    }, exclusive=True)
     background_wav = tf.random_crop(background_wav, [desired_samples, 1])
 
     if naive_version:
