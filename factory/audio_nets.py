@@ -32,6 +32,7 @@ _available_nets = [
     "ResNet2D8PoolModel",
     "DpNet1Model",
     "DpNet2Model",
+    "DpNet2NarrowModel",
 ]
 
 
@@ -515,6 +516,31 @@ class DpNet2Model(AudioNetModel):
             keep_prob=self.args.dropout_keep_prob)
         ):
             logits, endpoints = dpnet.DpNet2(
+                inputs,
+                self.args.num_classes,
+                width_multiplier=self.args.width_multiplier
+            )
+
+        return logits, endpoints
+
+
+class DpNet2NarrowModel(AudioNetModel):
+    def __init__(self, args, dataset=None):
+        super().__init__(args, dataset)
+
+    @staticmethod
+    def add_arguments(parser):
+        parser.add_argument("--weight_decay", default=0.0001, type=float)
+        parser.add_argument("--dropout_keep_prob", default=0.2, type=float)
+        parser.add_argument("--width_multiplier", default=1.0, type=float)
+
+    def build_inference(self, inputs, is_training):
+        with slim.arg_scope(dpnet.DpNet_arg_scope(
+            is_training=is_training,
+            weight_decay=self.args.weight_decay,
+            keep_prob=self.args.dropout_keep_prob)
+        ):
+            logits, endpoints = dpnet.DpNet2Narrow(
                 inputs,
                 self.args.num_classes,
                 width_multiplier=self.args.width_multiplier

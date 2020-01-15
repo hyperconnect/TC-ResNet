@@ -115,3 +115,14 @@ def DpNet2(inputs, num_classes, width_multiplier=1.0, scope="DpNet2"):
     last_channel = 128
 
     return dpnet(inputs, num_classes, n_channels, n_strides, n_ratios, n_layers, scope=scope, last_channel=last_channel)
+
+
+def DpNet2Narrow(inputs, num_classes, width_multiplier=1.0, scope="DpNet2Narrow"):
+    n_channels = [24, 16, 16, 24, 24]
+    n_strides = [2] * 4
+    n_ratios = [3] * 4
+    n_layers = [3] * 4
+    n_channels = [int(x * width_multiplier) for x in n_channels]
+    last_channel = 32
+
+    return dpnet(inputs, num_classes, n_channels, n_strides, n_ratios, n_layers, scope=scope, last_channel=last_channel)
