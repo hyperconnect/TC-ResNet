@@ -224,3 +224,6 @@ dmypy.json
 
 google_speech_commands/
 work/
+submit.xlsx
+~$submit.xlsx
+speech_commands_dataset/download_and_split.sh
