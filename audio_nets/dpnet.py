@@ -23,7 +23,7 @@ def DpNet_arg_scope(is_training, weight_decay=0.0001, keep_prob=0.8):
                 return scope
 
 
-def dpnet(inputs, num_classes, n_channels, n_strides, n_ratios, n_layers, scope):
+def dpnet(inputs, num_classes, n_channels, n_strides, n_ratios, n_layers, scope, last_channel=None):
     endpoints = dict()
     L = inputs.shape[1]
     C = inputs.shape[2]
@@ -73,6 +73,13 @@ def dpnet(inputs, num_classes, n_channels, n_strides, n_ratios, n_layers, scope)
         net = slim.avg_pool2d(
             net, kernel_size=net.shape[1:3], stride=1, scope="avg_pool")
 
+        if last_channel is not None:
+            net = slim.conv2d(net,
+                              last_channel,
+                              kernel_size=[1, 1],
+                              scope=f"pointwise_conv")
+            net = tf.nn.relu(net)
+
         net = slim.dropout(net)
 
         logits = slim.conv2d(
@@ -97,3 +104,14 @@ def DpNet1(inputs, num_classes, width_multiplier=1.0, scope="DpNet1"):
     n_channels = [int(x * width_multiplier) for x in n_channels]
 
     return dpnet(inputs, num_classes, n_channels, n_strides, n_ratios, n_layers, scope=scope)
+
+
+def DpNet2(inputs, num_classes, width_multiplier=1.0, scope="DpNet2"):
+    n_channels = [24, 16, 24, 36, 48]
+    n_strides = [2] * 4
+    n_ratios = [3] * 4
+    n_layers = [4] * 4
+    n_channels = [int(x * width_multiplier) for x in n_channels]
+    last_channel = 128
+
+    return dpnet(inputs, num_classes, n_channels, n_strides, n_ratios, n_layers, scope=scope, last_channel=last_channel)
