@@ -14,6 +14,7 @@ from audio_nets import kws
 from audio_nets import res
 from audio_nets import ds_cnn
 from audio_nets import tc_resnet
+from audio_nets import dpnet
 
 
 _available_nets = [
@@ -29,6 +30,7 @@ _available_nets = [
     "TCResNet14Model",
     "ResNet2D8Model",
     "ResNet2D8PoolModel",
+    "DpNet1Model",
 ]
 
 
@@ -60,10 +62,13 @@ class AudioNetModel(TFModel):
         self.total_params = tf_utils.show_models(self.log)
 
     def preprocess_input(self, for_deploy=False):
-        window_size_samples = int(self.args.sample_rate * self.args.window_size_ms / 1000)
-        window_stride_samples = int(self.args.sample_rate * self.args.window_stride_ms / 1000)
+        window_size_samples = int(
+            self.args.sample_rate * self.args.window_size_ms / 1000)
+        window_stride_samples = int(
+            self.args.sample_rate * self.args.window_stride_ms / 1000)
         if for_deploy:
-            self.args.sample_rate_const = tf.constant(self.args.sample_rate, dtype=tf.int32)
+            self.args.sample_rate_const = tf.constant(
+                self.args.sample_rate, dtype=tf.int32)
 
         audio_preprocessor = preprocessor_factory.factory(
             preprocess_method=self.args.preprocess_method,
@@ -80,13 +85,15 @@ class AudioNetModel(TFModel):
         )
 
         self.log.info(f"Update height/width to {self._audio.shape.as_list()}")
-        self.args.height, self.args.width, self.args.channels = self._audio.shape.as_list()[1:4]
+        self.args.height, self.args.width, self.args.channels = self._audio.shape.as_list()[
+            1:4]
 
         self.input_preprocessors_for_tflite = [audio_preprocessor]
 
     def build_deployable_model(self, include_preprocess=True):
         if include_preprocess:
-            desired_samples = int(self.args.sample_rate * self.args.clip_duration_ms / 1000)
+            desired_samples = int(self.args.sample_rate *
+                                  self.args.clip_duration_ms / 1000)
 
             self._audio = tf.placeholder(
                 tf.float32,
@@ -103,7 +110,8 @@ class AudioNetModel(TFModel):
                 self.args.output_name,
             )
         else:
-            self.log.info("Build graph which excludes preprocessing for freezing!")
+            self.log.info(
+                "Build graph which excludes preprocessing for freezing!")
             # only use for profiling
             assert self.args.height > 0
             assert self.args.width > 0
@@ -111,7 +119,8 @@ class AudioNetModel(TFModel):
 
             inputs = tf.placeholder(
                 tf.float32,
-                shape=[1, self.args.height, self.args.width, self.args.channels],
+                shape=[1, self.args.height,
+                       self.args.width, self.args.channels],
                 name="input",
             )
 
@@ -150,7 +159,8 @@ class AudioNetModel(TFModel):
         is_training: tf.placeholder,
         output_name: str
     ) -> [tf.Tensor, tf.Tensor, tf.Tensor, Dict]:
-        logits, endpoints = self.build_inference(inputs, is_training=is_training)
+        logits, endpoints = self.build_inference(
+            inputs, is_training=is_training)
         output = slim.softmax(logits, scope=output_name + "/softmax")
         output = tf.identity(output, name=output_name)
         return inputs, logits, output, endpoints
@@ -176,7 +186,8 @@ class AudioNetModel(TFModel):
             return ("batch_normalization" not in name) and ("BatchNorm" not in name)
 
         l2_loss = self.args.weight_decay * tf.add_n(
-            [tf.nn.l2_loss(tf.cast(v, tf.float32)) for v in tf.trainable_variables() if exclude_batch_norm(v.name)]
+            [tf.nn.l2_loss(tf.cast(v, tf.float32))
+             for v in tf.trainable_variables() if exclude_batch_norm(v.name)]
         )
 
         total_loss = model_loss + l2_loss
@@ -195,10 +206,12 @@ class GoogleKWS():
         model_settings = {}
         model_settings["fingerprint_width"] = inputs.shape.as_list()[2]
         model_settings["spectrogram_length"] = inputs.shape.as_list()[1]
-        model_settings["fingerprint_size"] = model_settings["spectrogram_length"] * model_settings["fingerprint_width"]
+        model_settings["fingerprint_size"] = model_settings["spectrogram_length"] * \
+            model_settings["fingerprint_width"]
         model_settings["label_count"] = self.args.num_classes
         model_settings["sample_rate"] = self.args.sample_rate
-        model_settings["window_stride_samples"] = int(self.args.sample_rate * self.args.window_stride_ms / 1000)
+        model_settings["window_stride_samples"] = int(
+            self.args.sample_rate * self.args.window_stride_ms / 1000)
         return model_settings
 
 
@@ -451,6 +464,31 @@ class ResNet2D8PoolModel(AudioNetModel):
             keep_prob=self.args.dropout_keep_prob)
         ):
             logits, endpoints = tc_resnet.ResNet2D8Pool(
+                inputs,
+                self.args.num_classes,
+                width_multiplier=self.args.width_multiplier
+            )
+
+        return logits, endpoints
+
+
+class DpNet1Model(AudioNetModel):
+    def __init__(self, args, dataset=None):
+        super().__init__(args, dataset)
+
+    @staticmethod
+    def add_arguments(parser):
+        parser.add_argument("--weight_decay", default=0.0001, type=float)
+        parser.add_argument("--dropout_keep_prob", default=0.2, type=float)
+        parser.add_argument("--width_multiplier", default=1.0, type=float)
+
+    def build_inference(self, inputs, is_training):
+        with slim.arg_scope(dpnet.DpNet_arg_scope(
+            is_training=is_training,
+            weight_decay=self.args.weight_decay,
+            keep_prob=self.args.dropout_keep_prob)
+        ):
+            logits, endpoints = dpnet.DpNet1(
                 inputs,
                 self.args.num_classes,
                 width_multiplier=self.args.width_multiplier

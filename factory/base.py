@@ -18,7 +18,7 @@ class TFModel(ABC):
         g_cnn.add_argument("--input_batch_size", type=int, default=1)
         g_cnn.add_argument("--output_name", type=str, required=True)
 
-        g_cnn.add_argument("--preprocess_method", required=True, type=str,
+        g_cnn.add_argument("--preprocess_method", type=str, default='mfcc',
                            choices=list(_available_preprocessors.keys()))
 
         g_cnn.add_argument("--no-ignore_missing_vars", dest="ignore_missing_vars", action="store_false")

@@ -261,7 +261,7 @@ class DataWrapperBase(ABC):
         g_common.add_argument("--add_null_class", dest="add_null_class", action="store_true")
         g_common.set_defaults(add_null_class=True)
 
-        g_common.add_argument("--batch_size", default=32, type=utils.positive_int,
+        g_common.add_argument("--batch_size", default=100, type=utils.positive_int,
                               help="The number of examples in batch.")
         g_common.add_argument("--no-shuffle", dest="shuffle", action="store_false")
         g_common.add_argument("--shuffle", dest="shuffle", action="store_true")
